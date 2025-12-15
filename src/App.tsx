@@ -8,7 +8,6 @@ function App() {
         <img src={gochLogo} alt="Goch Logo" className="logo" />
         <SocialLinks />
         <div className="construction">
-          <span className="construction-icon">🚧</span>
           <p>This website is under construction</p>
         </div>
       </div>
