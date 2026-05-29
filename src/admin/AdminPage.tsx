@@ -1,6 +1,11 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import type { FormEvent } from "react";
-import type { Profile, Project, ProjectMark } from "../types/project";
+import { ProjectMark } from "../components/ProjectMark";
+import type {
+  Profile,
+  Project,
+  ProjectMark as ProjectMarkType,
+} from "../types/project";
 
 interface AdminPageProps {
   fallbackProjects: Project[];
@@ -13,8 +18,14 @@ interface UploadResult {
 }
 
 type AdminStatus = "checking" | "authenticated" | "anonymous";
+type AdminSection = "profile" | "projects" | "project-editor";
 
-const projectMarks: ProjectMark[] = ["diamond", "triangle", "circle", "square"];
+const projectMarks: ProjectMarkType[] = [
+  "diamond",
+  "triangle",
+  "circle",
+  "square",
+];
 
 export function AdminPage({
   fallbackProjects,
@@ -24,6 +35,7 @@ export function AdminPage({
   const [token, setToken] = useState("");
   const [projects, setProjects] = useState<Project[]>(fallbackProjects);
   const [selectedId, setSelectedId] = useState<string>("new");
+  const [activeSection, setActiveSection] = useState<AdminSection>("projects");
   const [draft, setDraft] = useState<Project>(() => createEmptyProject());
   const [profile, setProfile] = useState<Profile>(fallbackProfile);
   const [message, setMessage] = useState("");
@@ -131,6 +143,7 @@ export function AdminPage({
 
       await loadAdminContent();
       setSelectedId("new");
+      setActiveSection("projects");
       setMessage("Project saved.");
     } catch (error) {
       setMessage(error instanceof Error ? error.message : "Project save failed.");
@@ -161,6 +174,7 @@ export function AdminPage({
 
       await loadAdminContent();
       setSelectedId("new");
+      setActiveSection("projects");
       setMessage("Project deleted.");
     } catch (error) {
       setMessage(error instanceof Error ? error.message : "Project delete failed.");
@@ -269,242 +283,318 @@ export function AdminPage({
       {message ? <p className="admin-message">{message}</p> : null}
 
       <div className="admin-layout">
-        <aside className="admin-sidebar" aria-label="Projects">
+        <aside className="admin-sidebar" aria-label="Admin sections">
           <button
             type="button"
-            className={selectedId === "new" ? "is-selected" : ""}
-            onClick={() => setSelectedId("new")}
+            className={activeSection === "profile" ? "is-selected" : ""}
+            onClick={() => setActiveSection("profile")}
+          >
+            Profile
+          </button>
+          <button
+            type="button"
+            className={activeSection === "projects" ? "is-selected" : ""}
+            onClick={() => setActiveSection("projects")}
+          >
+            Projects
+          </button>
+          <button
+            type="button"
+            className={
+              activeSection === "project-editor" && selectedId === "new"
+                ? "is-selected"
+                : ""
+            }
+            onClick={() => {
+              setSelectedId("new");
+              setActiveSection("project-editor");
+            }}
           >
             New project
           </button>
-
-          {projects.map((project) => (
-            <button
-              key={project.id}
-              type="button"
-              className={project.id === selectedId ? "is-selected" : ""}
-              onClick={() => setSelectedId(project.id)}
-            >
-              {project.name}
-            </button>
-          ))}
         </aside>
 
-        <section className="admin-panel" aria-labelledby="project-editor">
-          <h2 id="project-editor">Project</h2>
-          <form className="admin-form" onSubmit={saveProject}>
-            <div className="admin-grid">
+        {activeSection === "profile" ? (
+          <section className="admin-panel" aria-labelledby="profile-editor">
+            <h2 id="profile-editor">Profile</h2>
+            <form className="admin-form" onSubmit={saveProfile}>
+              <div className="admin-grid">
+                <label>
+                  Greeting
+                  <input
+                    value={profile.greeting}
+                    onChange={(event) =>
+                      setProfile({ ...profile, greeting: event.target.value })
+                    }
+                    required
+                  />
+                </label>
+                <label>
+                  Display name
+                  <input
+                    value={profile.displayName}
+                    onChange={(event) =>
+                      setProfile({
+                        ...profile,
+                        displayName: event.target.value,
+                      })
+                    }
+                    required
+                  />
+                </label>
+              </div>
+
               <label>
-                Name
-                <input
-                  value={draft.name}
+                Bio
+                <textarea
+                  value={profile.bio}
                   onChange={(event) =>
-                    setDraft({ ...draft, name: event.target.value })
+                    setProfile({ ...profile, bio: event.target.value })
                   }
+                  rows={5}
                   required
                 />
               </label>
+
               <label>
-                Mark
-                <select
-                  value={draft.mark}
-                  onChange={(event) =>
-                    setDraft({
-                      ...draft,
-                      mark: event.target.value as ProjectMark,
-                    })
-                  }
-                >
-                  {projectMarks.map((mark) => (
-                    <option key={mark} value={mark}>
-                      {mark}
-                    </option>
-                  ))}
-                </select>
-              </label>
-              <label>
-                Sort order
+                Portrait
                 <input
-                  type="number"
-                  value={draft.sortOrder ?? 0}
-                  onChange={(event) =>
-                    setDraft({
-                      ...draft,
-                      sortOrder: Number(event.target.value),
-                    })
-                  }
+                  type="file"
+                  accept="image/*"
+                  onChange={async (event) => {
+                    const file = event.target.files?.[0];
+                    if (!file) {
+                      return;
+                    }
+
+                    setMessage("Uploading portrait...");
+                    try {
+                      const upload = await uploadImage(file, "profile");
+                      setProfile({
+                        ...profile,
+                        portrait: upload.url,
+                        portraitKey: upload.key,
+                      });
+                      setMessage("Portrait uploaded.");
+                    } catch (error) {
+                      setMessage(
+                        error instanceof Error
+                          ? error.message
+                          : "Upload failed.",
+                      );
+                    }
+                  }}
                 />
               </label>
-            </div>
 
-            <label>
-              Description
-              <textarea
-                value={draft.description}
-                onChange={(event) =>
-                  setDraft({ ...draft, description: event.target.value })
-                }
-                rows={5}
-                required
-              />
-            </label>
-
-            <div className="admin-grid">
-              <label>
-                GitHub URL
-                <input
-                  type="url"
-                  value={draft.github ?? ""}
-                  onChange={(event) =>
-                    setDraft({ ...draft, github: event.target.value })
-                  }
+              {profile.portrait ? (
+                <img
+                  className="admin-portrait-preview"
+                  src={profile.portrait}
+                  alt=""
                 />
-              </label>
-              <label>
-                Live URL
-                <input
-                  type="url"
-                  value={draft.deployment ?? ""}
-                  onChange={(event) =>
-                    setDraft({ ...draft, deployment: event.target.value })
-                  }
-                />
-              </label>
-            </div>
+              ) : null}
 
-            <label>
-              Project logo
-              <input
-                type="file"
-                accept="image/*"
-                onChange={async (event) => {
-                  const file = event.target.files?.[0];
-                  if (!file) {
-                    return;
-                  }
+              <div className="admin-button-row">
+                <button type="submit" disabled={isSaving}>
+                  Save profile
+                </button>
+              </div>
+            </form>
+          </section>
+        ) : null}
 
-                  setMessage("Uploading logo...");
-                  try {
-                    const upload = await uploadImage(file, "projects");
-                    setDraft({
-                      ...draft,
-                      image: upload.url,
-                      imageKey: upload.key,
-                    });
-                    setMessage("Logo uploaded.");
-                  } catch (error) {
-                    setMessage(
-                      error instanceof Error ? error.message : "Upload failed.",
-                    );
-                  }
+        {activeSection === "projects" ? (
+          <section className="admin-panel" aria-labelledby="projects-manager">
+            <div className="admin-panel-header">
+              <h2 id="projects-manager">Projects</h2>
+              <button
+                type="button"
+                onClick={() => {
+                  setSelectedId("new");
+                  setActiveSection("project-editor");
                 }}
-              />
-            </label>
-
-            {draft.image ? (
-              <img className="admin-logo-preview" src={draft.image} alt="" />
-            ) : null}
-
-            <div className="admin-button-row">
-              <button type="submit" disabled={isSaving}>
-                {selectedId === "new" ? "Create project" : "Save project"}
+              >
+                New project
               </button>
-              {selectedId !== "new" ? (
+            </div>
+
+            <div className="admin-project-list">
+              {projects.length > 0 ? (
+                projects.map((project) => (
+                  <article className="admin-project-row" key={project.id}>
+                    <ProjectMark
+                      mark={project.mark}
+                      logo={project.image}
+                      name={project.name}
+                    />
+                    <div>
+                      <h3>{project.name}</h3>
+                      <p>{project.description}</p>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setSelectedId(project.id);
+                        setActiveSection("project-editor");
+                      }}
+                    >
+                      Edit
+                    </button>
+                  </article>
+                ))
+              ) : (
+                <p className="admin-muted">No projects yet.</p>
+              )}
+            </div>
+          </section>
+        ) : null}
+
+        {activeSection === "project-editor" ? (
+          <section className="admin-panel" aria-labelledby="project-editor">
+            <h2 id="project-editor">
+              {selectedId === "new" ? "New project" : "Edit project"}
+            </h2>
+            <form className="admin-form" onSubmit={saveProject}>
+              <div className="admin-grid">
+                <label>
+                  Name
+                  <input
+                    value={draft.name}
+                    onChange={(event) =>
+                      setDraft({ ...draft, name: event.target.value })
+                    }
+                    required
+                  />
+                </label>
+                <label>
+                  Mark
+                  <select
+                    value={draft.mark}
+                    onChange={(event) =>
+                      setDraft({
+                        ...draft,
+                        mark: event.target.value as ProjectMarkType,
+                      })
+                    }
+                  >
+                    {projectMarks.map((mark) => (
+                      <option key={mark} value={mark}>
+                        {mark}
+                      </option>
+                    ))}
+                  </select>
+                </label>
+                <label>
+                  Sort order
+                  <input
+                    type="number"
+                    value={draft.sortOrder ?? 0}
+                    onChange={(event) =>
+                      setDraft({
+                        ...draft,
+                        sortOrder: Number(event.target.value),
+                      })
+                    }
+                  />
+                </label>
+              </div>
+
+              <label>
+                Description
+                <textarea
+                  value={draft.description}
+                  onChange={(event) =>
+                    setDraft({ ...draft, description: event.target.value })
+                  }
+                  rows={5}
+                  required
+                />
+              </label>
+
+              <div className="admin-grid">
+                <label>
+                  GitHub URL
+                  <input
+                    type="url"
+                    value={draft.github ?? ""}
+                    onChange={(event) =>
+                      setDraft({ ...draft, github: event.target.value })
+                    }
+                  />
+                </label>
+                <label>
+                  Live URL
+                  <input
+                    type="url"
+                    value={draft.deployment ?? ""}
+                    onChange={(event) =>
+                      setDraft({ ...draft, deployment: event.target.value })
+                    }
+                  />
+                </label>
+              </div>
+
+              <label>
+                Project logo
+                <input
+                  type="file"
+                  accept="image/*"
+                  onChange={async (event) => {
+                    const file = event.target.files?.[0];
+                    if (!file) {
+                      return;
+                    }
+
+                    setMessage("Uploading logo...");
+                    try {
+                      const upload = await uploadImage(file, "projects");
+                      setDraft({
+                        ...draft,
+                        image: upload.url,
+                        imageKey: upload.key,
+                      });
+                      setMessage("Logo uploaded.");
+                    } catch (error) {
+                      setMessage(
+                        error instanceof Error
+                          ? error.message
+                          : "Upload failed.",
+                      );
+                    }
+                  }}
+                />
+              </label>
+
+              {draft.image ? (
+                <img className="admin-logo-preview" src={draft.image} alt="" />
+              ) : null}
+
+              <div className="admin-button-row">
+                <button type="submit" disabled={isSaving}>
+                  {selectedId === "new" ? "Create project" : "Save project"}
+                </button>
                 <button
                   type="button"
-                  className="admin-danger"
-                  onClick={deleteProject}
+                  onClick={() => setActiveSection("projects")}
                   disabled={isSaving}
                 >
-                  Delete
+                  Back to projects
                 </button>
-              ) : null}
-            </div>
-          </form>
-        </section>
-
-        <section className="admin-panel" aria-labelledby="profile-editor">
-          <h2 id="profile-editor">Profile</h2>
-          <form className="admin-form" onSubmit={saveProfile}>
-            <div className="admin-grid">
-              <label>
-                Greeting
-                <input
-                  value={profile.greeting}
-                  onChange={(event) =>
-                    setProfile({ ...profile, greeting: event.target.value })
-                  }
-                  required
-                />
-              </label>
-              <label>
-                Display name
-                <input
-                  value={profile.displayName}
-                  onChange={(event) =>
-                    setProfile({ ...profile, displayName: event.target.value })
-                  }
-                  required
-                />
-              </label>
-            </div>
-
-            <label>
-              Bio
-              <textarea
-                value={profile.bio}
-                onChange={(event) =>
-                  setProfile({ ...profile, bio: event.target.value })
-                }
-                rows={5}
-                required
-              />
-            </label>
-
-            <label>
-              Portrait
-              <input
-                type="file"
-                accept="image/*"
-                onChange={async (event) => {
-                  const file = event.target.files?.[0];
-                  if (!file) {
-                    return;
-                  }
-
-                  setMessage("Uploading portrait...");
-                  try {
-                    const upload = await uploadImage(file, "profile");
-                    setProfile({
-                      ...profile,
-                      portrait: upload.url,
-                      portraitKey: upload.key,
-                    });
-                    setMessage("Portrait uploaded.");
-                  } catch (error) {
-                    setMessage(
-                      error instanceof Error ? error.message : "Upload failed.",
-                    );
-                  }
-                }}
-              />
-            </label>
-
-            {profile.portrait ? (
-              <img
-                className="admin-portrait-preview"
-                src={profile.portrait}
-                alt=""
-              />
-            ) : null}
-
-            <div className="admin-button-row">
-              <button type="submit" disabled={isSaving}>
-                Save profile
-              </button>
-            </div>
-          </form>
-        </section>
+                {selectedId !== "new" ? (
+                  <button
+                    type="button"
+                    className="admin-danger"
+                    onClick={deleteProject}
+                    disabled={isSaving}
+                  >
+                    Delete
+                  </button>
+                ) : null}
+              </div>
+            </form>
+          </section>
+        ) : null}
       </div>
     </main>
   );

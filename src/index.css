@@ -463,6 +463,30 @@ svg {
   background: #9c1d1d;
 }
 
+.admin-panel-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 18px;
+}
+
+.admin-panel-header h2 {
+  margin-bottom: 0;
+}
+
+.admin-panel-header button,
+.admin-project-row button {
+  min-height: 40px;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  background: var(--foreground);
+  color: var(--background);
+  cursor: pointer;
+  padding: 0 14px;
+  font-weight: 600;
+}
+
 .admin-layout {
   display: grid;
   grid-template-columns: minmax(180px, 240px) minmax(0, 1fr);
@@ -514,6 +538,40 @@ svg {
   margin-bottom: 18px;
   font-size: clamp(1.3rem, 1.08rem + 0.6vw, 1.9rem);
   line-height: 1.1;
+}
+
+.admin-project-list {
+  display: grid;
+  gap: 10px;
+}
+
+.admin-project-row {
+  display: grid;
+  grid-template-columns: 44px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 14px;
+  border: 1px solid var(--soft-line);
+  border-radius: 8px;
+  padding: 12px;
+}
+
+.admin-project-row .project-mark {
+  --project-row-height: 44px;
+}
+
+.admin-project-row h3 {
+  font-size: 1rem;
+  line-height: 1.2;
+}
+
+.admin-project-row p {
+  display: -webkit-box;
+  margin-top: 3px;
+  overflow: hidden;
+  color: #4c5465;
+  font-size: 0.92rem;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
 }
 
 .admin-form {
@@ -681,6 +739,15 @@ svg {
 
   .admin-grid {
     grid-template-columns: 1fr;
+  }
+
+  .admin-project-row {
+    grid-template-columns: 44px minmax(0, 1fr);
+  }
+
+  .admin-project-row button {
+    grid-column: 2;
+    justify-self: start;
   }
 }
 
