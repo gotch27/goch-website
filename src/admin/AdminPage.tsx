@@ -93,7 +93,7 @@ export function AdminPage({
       return;
     }
 
-    setDraft(createEmptyProject(projects.length));
+    setDraft(createEmptyProject(projects.length + 1));
   }, [projects.length, selectedProject]);
 
   async function login(event: FormEvent<HTMLFormElement>) {
@@ -184,6 +184,52 @@ export function AdminPage({
       setMessage(error instanceof Error ? error.message : "Project delete failed.");
     } finally {
       setIsSaving(false);
+    }
+  }
+
+  async function moveProject(projectId: string, direction: -1 | 1) {
+    const currentIndex = projects.findIndex((project) => project.id === projectId);
+    const nextIndex = currentIndex + direction;
+
+    if (currentIndex < 0 || nextIndex < 0 || nextIndex >= projects.length) {
+      return;
+    }
+
+    const nextProjects = [...projects];
+    const [movedProject] = nextProjects.splice(currentIndex, 1);
+    nextProjects.splice(nextIndex, 0, movedProject);
+    const orderedProjects = nextProjects.map((project, index) => ({
+      ...project,
+      sortOrder: index + 1,
+    }));
+
+    setProjects(orderedProjects);
+    setMessage("");
+
+    try {
+      const response = await fetch("/api/admin/projects/reorder", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          ids: orderedProjects.map((project) => project.id),
+        }),
+      });
+
+      if (!response.ok) {
+        const data = (await response.json().catch(() => null)) as
+          | { error?: string }
+          | null;
+        throw new Error(data?.error ?? "Project order could not be saved");
+      }
+
+      const data = (await response.json()) as { projects?: Project[] };
+      setProjects(data.projects ?? orderedProjects);
+      setMessage("Project order saved.");
+    } catch (error) {
+      await loadAdminContent();
+      setMessage(
+        error instanceof Error ? error.message : "Project reorder failed.",
+      );
     }
   }
 
@@ -390,7 +436,7 @@ export function AdminPage({
 
             <div className="admin-project-list">
               {projects.length > 0 ? (
-                projects.map((project) => (
+                projects.map((project, index) => (
                   <article className="admin-project-row" key={project.id}>
                     <ProjectMark
                       mark={project.mark}
@@ -400,6 +446,25 @@ export function AdminPage({
                     <div>
                       <h3>{project.name}</h3>
                       <p>{project.description}</p>
+                    </div>
+                    <div
+                      className="admin-project-order"
+                      aria-label={`Change order for ${project.name}`}
+                    >
+                      <button
+                        type="button"
+                        onClick={() => moveProject(project.id, -1)}
+                        disabled={index === 0}
+                      >
+                        Up
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => moveProject(project.id, 1)}
+                        disabled={index === projects.length - 1}
+                      >
+                        Down
+                      </button>
                     </div>
                     <button
                       type="button"
@@ -425,7 +490,7 @@ export function AdminPage({
               {selectedId === "new" ? "New project" : "Edit project"}
             </h2>
             <form className="admin-form" onSubmit={saveProject}>
-              <div className="admin-grid">
+              <div className="admin-grid admin-grid--two">
                 <label>
                   Name
                   <input
@@ -453,19 +518,6 @@ export function AdminPage({
                       </option>
                     ))}
                   </select>
-                </label>
-                <label>
-                  Sort order
-                  <input
-                    type="number"
-                    value={draft.sortOrder ?? 0}
-                    onChange={(event) =>
-                      setDraft({
-                        ...draft,
-                        sortOrder: Number(event.target.value),
-                      })
-                    }
-                  />
                 </label>
               </div>
 

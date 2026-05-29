@@ -547,12 +547,26 @@ svg {
 
 .admin-project-row {
   display: grid;
-  grid-template-columns: 44px minmax(0, 1fr) auto;
+  grid-template-columns: 44px minmax(0, 1fr) auto auto;
   align-items: center;
   gap: 14px;
   border: 1px solid var(--soft-line);
   border-radius: 8px;
   padding: 12px;
+}
+
+.admin-grid--two {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.admin-project-order {
+  display: flex;
+  gap: 6px;
+}
+
+.admin-project-order button:disabled {
+  cursor: not-allowed;
+  opacity: 0.42;
 }
 
 .admin-project-row .project-mark {
@@ -735,6 +749,10 @@ svg {
 
   .admin-project-row {
     grid-template-columns: 44px minmax(0, 1fr);
+  }
+
+  .admin-project-order {
+    grid-column: 2;
   }
 
   .admin-project-row button {
