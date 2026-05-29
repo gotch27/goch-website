@@ -1,17 +1,73 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import projectsData from "./data/projects.json";
+import { AdminPage } from "./admin/AdminPage";
 import { BioBlock } from "./components/BioBlock";
 import { ProfileIntro } from "./components/ProfileIntro";
 import { ProjectDialog } from "./components/ProjectDialog";
 import { ProjectsList } from "./components/ProjectsList";
 import { SiteLogo } from "./components/SiteLogo";
 import { SocialLinks } from "./components/SocialLinks";
-import type { Project } from "./types/project";
+import type { Profile, Project } from "./types/project";
 
-const projects = projectsData as Project[];
+const fallbackProjects = projectsData as Project[];
+const fallbackProfile: Profile = {
+  displayName: "Gorazd Filipovski",
+  greeting: "Hello, I'm",
+  bio: "Software engineer and designer based in Skopje. I build minimal, considered products at the intersection of craft and code.",
+};
 
 function App() {
+  const isAdminRoute = window.location.pathname.startsWith("/admin");
+
+  if (isAdminRoute) {
+    return <AdminPage fallbackProjects={fallbackProjects} fallbackProfile={fallbackProfile} />;
+  }
+
+  return <HomePage />;
+}
+
+function HomePage() {
   const [activeProject, setActiveProject] = useState<Project | null>(null);
+  const [projects, setProjects] = useState<Project[]>(fallbackProjects);
+  const [profile, setProfile] = useState<Profile>(fallbackProfile);
+
+  useEffect(() => {
+    let isMounted = true;
+
+    async function loadContent() {
+      try {
+        const [projectsResponse, profileResponse] = await Promise.all([
+          fetch("/api/projects"),
+          fetch("/api/profile"),
+        ]);
+
+        if (projectsResponse.ok) {
+          const data = (await projectsResponse.json()) as { projects?: Project[] };
+          if (isMounted && data.projects?.length) {
+            setProjects(data.projects);
+          }
+        }
+
+        if (profileResponse.ok) {
+          const data = (await profileResponse.json()) as { profile?: Profile | null };
+          if (isMounted && data.profile) {
+            setProfile({ ...fallbackProfile, ...data.profile });
+          }
+        }
+      } catch {
+        if (isMounted) {
+          setProjects(fallbackProjects);
+          setProfile(fallbackProfile);
+        }
+      }
+    }
+
+    void loadContent();
+
+    return () => {
+      isMounted = false;
+    };
+  }, []);
 
   return (
     <main className="home-page">
@@ -19,11 +75,11 @@ function App() {
 
       <div className="site-shell">
         <div className="corner corner--top-left">
-          <ProfileIntro />
+          <ProfileIntro profile={profile} />
         </div>
 
         <div className="corner corner--top-right">
-          <BioBlock />
+          <BioBlock profile={profile} />
         </div>
 
         <SiteLogo />

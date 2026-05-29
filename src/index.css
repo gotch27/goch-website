@@ -361,6 +361,16 @@ svg {
   line-height: 1.55;
 }
 
+.project-dialog__image {
+  display: block;
+  width: 100%;
+  max-height: 320px;
+  margin-top: 26px;
+  border: 1px solid var(--soft-line);
+  border-radius: 6px;
+  object-fit: cover;
+}
+
 .project-dialog__links {
   display: flex;
   flex-wrap: wrap;
@@ -389,6 +399,198 @@ svg {
   stroke-width: 1.8;
   stroke-linecap: round;
   stroke-linejoin: round;
+}
+
+.admin-page {
+  min-height: 100svh;
+  background: #f7f7f4;
+  color: var(--foreground);
+  padding: clamp(22px, 4vw, 48px);
+}
+
+.admin-page--centered {
+  display: grid;
+  place-items: center;
+}
+
+.admin-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 24px;
+  margin-bottom: 28px;
+}
+
+.admin-header h1,
+.admin-login h1 {
+  margin-top: 8px;
+  font-size: clamp(2rem, 1.45rem + 1.7vw, 3.4rem);
+  line-height: 1;
+}
+
+.admin-actions,
+.admin-button-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.admin-actions a,
+.admin-actions button,
+.admin-button-row button,
+.admin-login button {
+  min-height: 42px;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  background: var(--foreground);
+  color: var(--background);
+  cursor: pointer;
+  padding: 0 16px;
+  font-weight: 600;
+}
+
+.admin-actions a,
+.admin-actions button {
+  display: inline-flex;
+  align-items: center;
+  background: transparent;
+  color: var(--foreground);
+}
+
+.admin-button-row button:disabled {
+  cursor: wait;
+  opacity: 0.58;
+}
+
+.admin-button-row .admin-danger {
+  border-color: #9c1d1d;
+  background: #9c1d1d;
+}
+
+.admin-layout {
+  display: grid;
+  grid-template-columns: minmax(180px, 240px) minmax(0, 1fr);
+  gap: 18px;
+  align-items: start;
+}
+
+.admin-sidebar,
+.admin-panel,
+.admin-login {
+  border: 1px solid #d6d4cb;
+  border-radius: 8px;
+  background: var(--background);
+}
+
+.admin-sidebar {
+  display: grid;
+  gap: 6px;
+  padding: 8px;
+  position: sticky;
+  top: 24px;
+}
+
+.admin-sidebar button {
+  min-height: 40px;
+  border: 0;
+  border-radius: 5px;
+  background: transparent;
+  cursor: pointer;
+  padding: 0 12px;
+  text-align: left;
+}
+
+.admin-sidebar button:hover,
+.admin-sidebar button:focus-visible,
+.admin-sidebar button.is-selected {
+  background: #ededdf;
+}
+
+.admin-panel {
+  padding: clamp(18px, 2.5vw, 28px);
+}
+
+.admin-panel + .admin-panel {
+  grid-column: 2;
+}
+
+.admin-panel h2 {
+  margin-bottom: 18px;
+  font-size: clamp(1.3rem, 1.08rem + 0.6vw, 1.9rem);
+  line-height: 1.1;
+}
+
+.admin-form {
+  display: grid;
+  gap: 18px;
+}
+
+.admin-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.admin-form label,
+.admin-login label {
+  display: grid;
+  gap: 7px;
+  color: #384055;
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+
+.admin-form input,
+.admin-form select,
+.admin-form textarea,
+.admin-login input {
+  width: 100%;
+  border: 1px solid #bfc3cf;
+  border-radius: 6px;
+  background: #fff;
+  color: var(--foreground);
+  font: inherit;
+  font-weight: 400;
+  padding: 10px 12px;
+}
+
+.admin-form textarea {
+  resize: vertical;
+}
+
+.admin-image-preview {
+  width: min(100%, 520px);
+  max-height: 260px;
+  border: 1px solid var(--soft-line);
+  border-radius: 6px;
+  object-fit: cover;
+}
+
+.admin-portrait-preview {
+  width: 104px;
+  height: 104px;
+  border: 1px solid var(--soft-line);
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.admin-login {
+  display: grid;
+  width: min(100%, 420px);
+  gap: 18px;
+  padding: clamp(22px, 4vw, 34px);
+}
+
+.admin-home-link {
+  color: var(--muted);
+  font-weight: 600;
+}
+
+.admin-message,
+.admin-muted {
+  margin-bottom: 18px;
+  color: #384055;
+  font-weight: 600;
 }
 
 @media (max-width: 900px) {
@@ -466,6 +668,23 @@ svg {
     align-items: flex-end;
     justify-content: flex-end;
     gap: 14px;
+  }
+
+  .admin-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .admin-sidebar,
+  .admin-panel + .admin-panel {
+    grid-column: auto;
+  }
+
+  .admin-sidebar {
+    position: static;
+  }
+
+  .admin-grid {
+    grid-template-columns: 1fr;
   }
 }
 

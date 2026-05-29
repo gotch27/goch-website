@@ -60,6 +60,13 @@ export function ProjectDialog({ project, onClose }: ProjectDialogProps) {
           <h2 id="project-dialog-title">{project.name}</h2>
         </div>
 
+        <img
+          className="project-dialog__image"
+          src={project.image}
+          alt=""
+          loading="lazy"
+        />
+
         <p className="project-dialog__description">{project.description}</p>
 
         <div className="project-dialog__links" aria-label="Project links">
