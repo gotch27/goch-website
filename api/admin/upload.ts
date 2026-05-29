@@ -30,8 +30,10 @@ export default async function handler(
       ? fileNameHeader[0]
       : fileNameHeader;
 
-    if (!contentType?.startsWith("image/")) {
-      sendJson(response, 400, { error: "Upload must be an image" });
+    if (!isAllowedLogoType(contentType)) {
+      sendJson(response, 400, {
+        error: "Upload must be a png, jpg, jpeg, svg, or mp4 file",
+      });
       return;
     }
 
@@ -55,6 +57,15 @@ export default async function handler(
       error: error instanceof Error ? error.message : "Upload failed",
     });
   }
+}
+
+function isAllowedLogoType(contentType: string | undefined) {
+  return (
+    contentType === "image/png" ||
+    contentType === "image/jpeg" ||
+    contentType === "image/svg+xml" ||
+    contentType === "video/mp4"
+  );
 }
 
 function sanitizeFileName(fileName: string) {

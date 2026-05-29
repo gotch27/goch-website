@@ -6,8 +6,17 @@ interface ProjectLogoProps {
 export function ProjectLogo({ logo, name }: ProjectLogoProps) {
   return (
     <span className="project-logo" aria-hidden="true">
-      {logo ? (
-        <img src={logo} alt="" className="project-logo__image" />
+      {logo && isVideoLogo(logo) ? (
+        <video
+          className="project-logo__media"
+          src={logo}
+          autoPlay
+          loop
+          muted
+          playsInline
+        />
+      ) : logo ? (
+        <img src={logo} alt="" className="project-logo__media" />
       ) : (
         <span className="project-logo__initials">{getInitials(name)}</span>
       )}
@@ -25,4 +34,8 @@ function getInitials(name: string) {
     .join("");
 
   return initials || "?";
+}
+
+function isVideoLogo(logo: string) {
+  return /\.mp4($|\?)/i.test(logo);
 }

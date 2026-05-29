@@ -561,7 +561,7 @@ export function AdminPage() {
                 Project logo
                 <input
                   type="file"
-                  accept="image/*"
+                  accept=".png,.jpg,.jpeg,.svg,.mp4,image/png,image/jpeg,image/svg+xml,video/mp4"
                   onChange={async (event) => {
                     const file = event.target.files?.[0];
                     if (!file) {
@@ -588,9 +588,7 @@ export function AdminPage() {
                 />
               </label>
 
-              {draft.image ? (
-                <img className="admin-logo-preview" src={draft.image} alt="" />
-              ) : null}
+              <LogoPreview logo={draft.image} />
 
               <div className="admin-button-row">
                 <button type="submit" disabled={isSaving}>
@@ -641,4 +639,25 @@ function normalizeProject(project: Project): Project {
     deployment: project.deployment?.trim() || undefined,
     sortOrder: project.sortOrder ?? 0,
   };
+}
+
+function LogoPreview({ logo }: { logo?: string }) {
+  if (!logo) {
+    return null;
+  }
+
+  if (/\.mp4($|\?)/i.test(logo)) {
+    return (
+      <video
+        className="admin-logo-preview"
+        src={logo}
+        autoPlay
+        loop
+        muted
+        playsInline
+      />
+    );
+  }
+
+  return <img className="admin-logo-preview" src={logo} alt="" />;
 }
