@@ -39,8 +39,9 @@ Migrations live in `database/migrations`. They are applied through
 - Public pages read projects from `GET /api/projects`.
 - Public profile text reads from `GET /api/profile`.
 - `/admin` manages projects and profile content after token login.
-- Project and portrait images upload to Vercel Blob.
+- Project logos upload to Vercel Blob.
 - Neon stores the image URL and Blob key, not the image file itself.
+- The profile portrait is a static bundled asset at `src/assets/gorazd-profile.png`.
 
 The site still falls back to the local JSON/static assets if the API is not
 available, which keeps local Vite development simple.

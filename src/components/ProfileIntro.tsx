@@ -9,7 +9,7 @@ export function ProfileIntro({ profile }: ProfileIntroProps) {
   return (
     <section className="profile-intro" aria-label="Profile">
       <img
-        src={profile.portrait ?? portrait}
+        src={portrait}
         alt={profile.displayName}
         width="88"
         height="88"

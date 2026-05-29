@@ -620,14 +620,6 @@ svg {
   object-fit: contain;
 }
 
-.admin-portrait-preview {
-  width: 104px;
-  height: 104px;
-  border: 1px solid var(--soft-line);
-  border-radius: 50%;
-  object-fit: cover;
-}
-
 .admin-login {
   display: grid;
   width: min(100%, 420px);

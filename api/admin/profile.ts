@@ -1,4 +1,3 @@
-import { del } from "@vercel/blob";
 import type { VercelRequest, VercelResponse } from "@vercel/node";
 import { requireAdmin } from "../_lib/auth.js";
 import { methodNotAllowed, readJsonBody, sendJson } from "../_lib/http.js";
@@ -30,34 +29,23 @@ export default async function handler(
   }
 
   try {
-    const existing = await getProfile();
     const input = readProfileInput(await readJsonBody(request));
     const sql = getSql();
     await sql`
       insert into site_profile (
-        id, display_name, greeting, bio, portrait_url, portrait_key, updated_at
+        id, display_name, greeting, bio, updated_at
       )
       values (
-        'main', ${input.displayName}, ${input.greeting}, ${input.bio},
-        ${input.portrait ?? null}, ${input.portraitKey ?? null}, now()
+        'main', ${input.displayName}, ${input.greeting}, ${input.bio}, now()
       )
       on conflict (id)
       do update set
         display_name = excluded.display_name,
         greeting = excluded.greeting,
         bio = excluded.bio,
-        portrait_url = excluded.portrait_url,
-        portrait_key = excluded.portrait_key,
         updated_at = now()
     `;
     const profile = await getProfile();
-
-    if (
-      existing?.portraitKey &&
-      existing.portraitKey !== input.portraitKey
-    ) {
-      await del(existing.portraitKey).catch(() => undefined);
-    }
 
     sendJson(response, 200, { profile });
   } catch (error) {

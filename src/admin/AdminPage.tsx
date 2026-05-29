@@ -10,7 +10,6 @@ import type {
 interface AdminPageProps {
   fallbackProjects: Project[];
   fallbackProfile: Profile;
-  fallbackPortrait: string;
 }
 
 interface UploadResult {
@@ -31,7 +30,6 @@ const projectMarks: ProjectMarkType[] = [
 export function AdminPage({
   fallbackProjects,
   fallbackProfile,
-  fallbackPortrait,
 }: AdminPageProps) {
   const [status, setStatus] = useState<AdminStatus>("checking");
   const [token, setToken] = useState("");
@@ -62,7 +60,11 @@ export function AdminPage({
 
     if (profileResponse.ok) {
       const data = (await profileResponse.json()) as { profile?: Profile | null };
-      setProfile({ ...fallbackProfile, ...(data.profile ?? {}) });
+      setProfile({
+        displayName: data.profile?.displayName ?? fallbackProfile.displayName,
+        greeting: data.profile?.greeting ?? fallbackProfile.greeting,
+        bio: data.profile?.bio ?? fallbackProfile.bio,
+      });
     }
   }, [fallbackProfile, fallbackProjects]);
 
@@ -194,7 +196,11 @@ export function AdminPage({
       const response = await fetch("/api/admin/profile", {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(profile),
+        body: JSON.stringify({
+          displayName: profile.displayName,
+          greeting: profile.greeting,
+          bio: profile.bio,
+        }),
       });
 
       if (!response.ok) {
@@ -213,13 +219,13 @@ export function AdminPage({
     }
   }
 
-  async function uploadImage(file: File, folder: "profile" | "projects") {
+  async function uploadImage(file: File) {
     const response = await fetch("/api/admin/upload", {
       method: "POST",
       headers: {
         "Content-Type": file.type,
         "X-File-Name": file.name,
-        "X-Upload-Folder": folder,
+        "X-Upload-Folder": "projects",
       },
       body: await file.arrayBuffer(),
     });
@@ -357,45 +363,6 @@ export function AdminPage({
                   required
                 />
               </label>
-
-              <label>
-                Portrait
-                <input
-                  type="file"
-                  accept="image/*"
-                  onChange={async (event) => {
-                    const file = event.target.files?.[0];
-                    if (!file) {
-                      return;
-                    }
-
-                    setMessage("Uploading portrait...");
-                    try {
-                      const upload = await uploadImage(file, "profile");
-                      setProfile({
-                        ...profile,
-                        portrait: upload.url,
-                        portraitKey: upload.key,
-                      });
-                      setMessage("Portrait uploaded.");
-                    } catch (error) {
-                      setMessage(
-                        error instanceof Error
-                          ? error.message
-                          : "Upload failed.",
-                      );
-                    }
-                  }}
-                />
-              </label>
-
-              {profile.portrait || fallbackPortrait ? (
-                <img
-                  className="admin-portrait-preview"
-                  src={profile.portrait ?? fallbackPortrait}
-                  alt=""
-                />
-              ) : null}
 
               <div className="admin-button-row">
                 <button type="submit" disabled={isSaving}>
@@ -550,7 +517,7 @@ export function AdminPage({
 
                     setMessage("Uploading logo...");
                     try {
-                      const upload = await uploadImage(file, "projects");
+                      const upload = await uploadImage(file);
                       setDraft({
                         ...draft,
                         image: upload.url,

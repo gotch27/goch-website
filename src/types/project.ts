@@ -16,6 +16,4 @@ export interface Profile {
   displayName: string;
   greeting: string;
   bio: string;
-  portrait?: string;
-  portraitKey?: string;
 }

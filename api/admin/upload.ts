@@ -26,11 +26,9 @@ export default async function handler(
   try {
     const contentType = request.headers["content-type"];
     const fileNameHeader = request.headers["x-file-name"];
-    const folderHeader = request.headers["x-upload-folder"];
     const fileName = Array.isArray(fileNameHeader)
       ? fileNameHeader[0]
       : fileNameHeader;
-    const folder = folderHeader === "profile" ? "profile" : "projects";
 
     if (!contentType?.startsWith("image/")) {
       sendJson(response, 400, { error: "Upload must be an image" });
@@ -44,7 +42,7 @@ export default async function handler(
     }
 
     const safeFileName = sanitizeFileName(fileName ?? "image");
-    const key = `${folder}/${Date.now()}-${randomUUID()}-${safeFileName}`;
+    const key = `projects/${Date.now()}-${randomUUID()}-${safeFileName}`;
     const blob = await put(key, body, {
       access: "public",
       contentType,

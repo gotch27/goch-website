@@ -4,22 +4,18 @@ export interface ProfileRecord {
   displayName: string;
   greeting: string;
   bio: string;
-  portrait?: string;
-  portraitKey?: string;
 }
 
 interface ProfileRow {
   display_name: string;
   greeting: string;
   bio: string;
-  portrait_url: string | null;
-  portrait_key: string | null;
 }
 
 export async function getProfile() {
   const sql = getSql();
   const rows = await sql`
-    select display_name, greeting, bio, portrait_url, portrait_key
+    select display_name, greeting, bio
     from site_profile
     where id = 'main'
     limit 1
@@ -41,10 +37,8 @@ export function readProfileInput(body: unknown): ProfileRecord {
   const displayName = readRequiredString(record.displayName, "displayName");
   const greeting = readRequiredString(record.greeting, "greeting");
   const bio = readRequiredString(record.bio, "bio");
-  const portrait = readOptionalString(record.portrait);
-  const portraitKey = readOptionalString(record.portraitKey);
 
-  return { displayName, greeting, bio, portrait, portraitKey };
+  return { displayName, greeting, bio };
 }
 
 function mapProfileRow(row: ProfileRow): ProfileRecord {
@@ -52,8 +46,6 @@ function mapProfileRow(row: ProfileRow): ProfileRecord {
     displayName: row.display_name,
     greeting: row.greeting,
     bio: row.bio,
-    portrait: row.portrait_url ?? undefined,
-    portraitKey: row.portrait_key ?? undefined,
   };
 }
 
@@ -63,13 +55,4 @@ function readRequiredString(value: unknown, field: string) {
   }
 
   return value.trim();
-}
-
-function readOptionalString(value: unknown) {
-  if (typeof value !== "string") {
-    return undefined;
-  }
-
-  const trimmed = value.trim();
-  return trimmed.length > 0 ? trimmed : undefined;
 }

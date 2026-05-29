@@ -1,7 +1,6 @@
 import { useEffect, useState } from "react";
 import projectsData from "./data/projects.json";
 import { AdminPage } from "./admin/AdminPage";
-import fallbackPortrait from "./assets/gorazd-profile.png";
 import { BioBlock } from "./components/BioBlock";
 import { ProfileIntro } from "./components/ProfileIntro";
 import { ProjectDialog } from "./components/ProjectDialog";
@@ -25,7 +24,6 @@ function App() {
       <AdminPage
         fallbackProjects={fallbackProjects}
         fallbackProfile={fallbackProfile}
-        fallbackPortrait={fallbackPortrait}
       />
     );
   }
