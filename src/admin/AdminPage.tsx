@@ -10,6 +10,7 @@ import type {
 interface AdminPageProps {
   fallbackProjects: Project[];
   fallbackProfile: Profile;
+  fallbackPortrait: string;
 }
 
 interface UploadResult {
@@ -30,6 +31,7 @@ const projectMarks: ProjectMarkType[] = [
 export function AdminPage({
   fallbackProjects,
   fallbackProfile,
+  fallbackPortrait,
 }: AdminPageProps) {
   const [status, setStatus] = useState<AdminStatus>("checking");
   const [token, setToken] = useState("");
@@ -387,10 +389,10 @@ export function AdminPage({
                 />
               </label>
 
-              {profile.portrait ? (
+              {profile.portrait || fallbackPortrait ? (
                 <img
                   className="admin-portrait-preview"
-                  src={profile.portrait}
+                  src={profile.portrait ?? fallbackPortrait}
                   alt=""
                 />
               ) : null}
