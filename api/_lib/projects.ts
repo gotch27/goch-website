@@ -1,5 +1,5 @@
 import { neon } from "@neondatabase/serverless";
-import { requiredEnv } from "./http";
+import { requiredEnv } from "./http.js";
 
 export type ProjectMark = "diamond" | "triangle" | "circle" | "square";
 

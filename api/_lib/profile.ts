@@ -1,4 +1,4 @@
-import { getSql } from "./projects";
+import { getSql } from "./projects.js";
 
 export interface ProfileRecord {
   displayName: string;

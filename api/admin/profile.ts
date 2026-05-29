@@ -1,9 +1,9 @@
 import { del } from "@vercel/blob";
 import type { VercelRequest, VercelResponse } from "@vercel/node";
-import { requireAdmin } from "../_lib/auth";
-import { methodNotAllowed, readJsonBody, sendJson } from "../_lib/http";
-import { getProfile, readProfileInput } from "../_lib/profile";
-import { getSql } from "../_lib/projects";
+import { requireAdmin } from "../_lib/auth.js";
+import { methodNotAllowed, readJsonBody, sendJson } from "../_lib/http.js";
+import { getProfile, readProfileInput } from "../_lib/profile.js";
+import { getSql } from "../_lib/projects.js";
 
 export default async function handler(
   request: VercelRequest,

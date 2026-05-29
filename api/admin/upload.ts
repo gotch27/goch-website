@@ -1,8 +1,8 @@
 import { randomUUID } from "node:crypto";
 import { put } from "@vercel/blob";
 import type { VercelRequest, VercelResponse } from "@vercel/node";
-import { requireAdmin } from "../_lib/auth";
-import { methodNotAllowed, readRawBody, sendJson } from "../_lib/http";
+import { requireAdmin } from "../_lib/auth.js";
+import { methodNotAllowed, readRawBody, sendJson } from "../_lib/http.js";
 
 export const config = {
   api: {

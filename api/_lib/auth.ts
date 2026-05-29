@@ -1,6 +1,6 @@
 import { createHmac, timingSafeEqual } from "node:crypto";
 import type { VercelRequest, VercelResponse } from "@vercel/node";
-import { requiredEnv, sendJson } from "./http";
+import { requiredEnv, sendJson } from "./http.js";
 
 const cookieName = "goch_admin_session";
 const maxAgeSeconds = 60 * 60 * 24 * 7;

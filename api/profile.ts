@@ -1,6 +1,6 @@
 import type { VercelRequest, VercelResponse } from "@vercel/node";
-import { methodNotAllowed, sendJson } from "./_lib/http";
-import { getProfile } from "./_lib/profile";
+import { methodNotAllowed, sendJson } from "./_lib/http.js";
+import { getProfile } from "./_lib/profile.js";
 
 export default async function handler(
   request: VercelRequest,

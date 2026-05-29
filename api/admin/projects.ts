@@ -1,13 +1,13 @@
 import { randomUUID } from "node:crypto";
 import type { VercelRequest, VercelResponse } from "@vercel/node";
-import { requireAdmin } from "../_lib/auth";
-import { methodNotAllowed, readJsonBody, sendJson } from "../_lib/http";
+import { requireAdmin } from "../_lib/auth.js";
+import { methodNotAllowed, readJsonBody, sendJson } from "../_lib/http.js";
 import {
   getProjectById,
   getProjects,
   getSql,
   readProjectInput,
-} from "../_lib/projects";
+} from "../_lib/projects.js";
 
 export default async function handler(
   request: VercelRequest,
