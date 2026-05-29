@@ -74,6 +74,26 @@ svg {
   padding: clamp(28px, 4vw, 56px);
 }
 
+.home-page--loading {
+  display: grid;
+  place-items: center;
+}
+
+.loading-spinner {
+  width: 34px;
+  aspect-ratio: 1;
+  border: 2px solid var(--soft-line);
+  border-top-color: var(--foreground);
+  border-radius: 50%;
+  animation: loading-spin 780ms linear infinite;
+}
+
+@keyframes loading-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
 .site-shell {
   position: relative;
   min-height: calc(100svh - (clamp(28px, 4vw, 56px) * 2));

@@ -84,8 +84,8 @@ function HomePage() {
 
   if (!profile || !projects) {
     return (
-      <main className="home-page">
-        <p className="admin-muted">Loading content...</p>
+      <main className="home-page home-page--loading">
+        <div className="loading-spinner" role="status" aria-label="Loading content" />
       </main>
     );
   }
