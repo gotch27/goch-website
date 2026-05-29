@@ -7,12 +7,12 @@ interface SocialLink {
 const socialLinks: SocialLink[] = [
   {
     name: "GitHub",
-    url: "https://github.com/GogoPro27",
+    url: "https://github.com/gotch27",
     icon: "github",
   },
   {
     name: "X",
-    url: "https://x.com/GogoPro27",
+    url: "https://x.com/gotcheski",
     icon: "x",
   },
   {
