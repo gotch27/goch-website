@@ -56,16 +56,13 @@ export function ProjectDialog({ project, onClose }: ProjectDialogProps) {
         </button>
 
         <div className="project-dialog__header">
-          <ProjectMark mark={project.mark} />
+          <ProjectMark
+            mark={project.mark}
+            logo={project.image}
+            name={project.name}
+          />
           <h2 id="project-dialog-title">{project.name}</h2>
         </div>
-
-        <img
-          className="project-dialog__image"
-          src={project.image}
-          alt=""
-          loading="lazy"
-        />
 
         <p className="project-dialog__description">{project.description}</p>
 

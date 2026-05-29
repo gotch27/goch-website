@@ -21,7 +21,11 @@ export function ProjectsList({ projects, onProjectSelect }: ProjectsListProps) {
                 className="project-button"
                 onClick={() => onProjectSelect(project)}
               >
-                <ProjectMark mark={project.mark} />
+                <ProjectMark
+                  mark={project.mark}
+                  logo={project.image}
+                  name={project.name}
+                />
                 <span>{project.name}</span>
               </button>
             </li>

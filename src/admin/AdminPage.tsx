@@ -373,7 +373,7 @@ export function AdminPage({
             </div>
 
             <label>
-              Project image
+              Project logo
               <input
                 type="file"
                 accept="image/*"
@@ -383,7 +383,7 @@ export function AdminPage({
                     return;
                   }
 
-                  setMessage("Uploading image...");
+                  setMessage("Uploading logo...");
                   try {
                     const upload = await uploadImage(file, "projects");
                     setDraft({
@@ -391,7 +391,7 @@ export function AdminPage({
                       image: upload.url,
                       imageKey: upload.key,
                     });
-                    setMessage("Image uploaded.");
+                    setMessage("Logo uploaded.");
                   } catch (error) {
                     setMessage(
                       error instanceof Error ? error.message : "Upload failed.",
@@ -402,7 +402,7 @@ export function AdminPage({
             </label>
 
             {draft.image ? (
-              <img className="admin-image-preview" src={draft.image} alt="" />
+              <img className="admin-logo-preview" src={draft.image} alt="" />
             ) : null}
 
             <div className="admin-button-row">
