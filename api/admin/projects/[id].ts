@@ -56,9 +56,8 @@ async function updateProject(
       update projects
       set
         name = ${input.name},
-        mark = ${input.mark},
         description = ${input.description},
-        image_url = ${input.image},
+        image_url = ${input.image ?? null},
         image_key = ${input.imageKey ?? null},
         github_url = ${input.github ?? null},
         deployment_url = ${input.deployment ?? null},

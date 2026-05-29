@@ -1,5 +1,4 @@
 import { useEffect, useState } from "react";
-import projectsData from "./data/projects.json";
 import { AdminPage } from "./admin/AdminPage";
 import { BioBlock } from "./components/BioBlock";
 import { ProfileIntro } from "./components/ProfileIntro";
@@ -9,23 +8,11 @@ import { SiteLogo } from "./components/SiteLogo";
 import { SocialLinks } from "./components/SocialLinks";
 import type { Profile, Project } from "./types/project";
 
-const fallbackProjects = projectsData as Project[];
-const fallbackProfile: Profile = {
-  displayName: "Gorazd Filipovski",
-  greeting: "Hello, I'm",
-  bio: "Software engineer and designer based in Skopje. I build minimal, considered products at the intersection of craft and code.",
-};
-
 function App() {
   const isAdminRoute = window.location.pathname.startsWith("/admin");
 
   if (isAdminRoute) {
-    return (
-      <AdminPage
-        fallbackProjects={fallbackProjects}
-        fallbackProfile={fallbackProfile}
-      />
-    );
+    return <AdminPage />;
   }
 
   return <HomePage />;
@@ -33,8 +20,9 @@ function App() {
 
 function HomePage() {
   const [activeProject, setActiveProject] = useState<Project | null>(null);
-  const [projects, setProjects] = useState<Project[]>(fallbackProjects);
-  const [profile, setProfile] = useState<Profile>(fallbackProfile);
+  const [projects, setProjects] = useState<Project[] | null>(null);
+  const [profile, setProfile] = useState<Profile | null>(null);
+  const [error, setError] = useState("");
 
   useEffect(() => {
     let isMounted = true;
@@ -46,23 +34,35 @@ function HomePage() {
           fetch("/api/profile"),
         ]);
 
-        if (projectsResponse.ok) {
-          const data = (await projectsResponse.json()) as { projects?: Project[] };
-          if (isMounted && data.projects?.length) {
-            setProjects(data.projects);
-          }
+        if (!projectsResponse.ok) {
+          throw new Error("Projects could not be loaded.");
         }
 
-        if (profileResponse.ok) {
-          const data = (await profileResponse.json()) as { profile?: Profile | null };
-          if (isMounted && data.profile) {
-            setProfile({ ...fallbackProfile, ...data.profile });
-          }
+        if (!profileResponse.ok) {
+          throw new Error("Profile could not be loaded.");
         }
-      } catch {
+
+        const projectsData = (await projectsResponse.json()) as {
+          projects?: Project[];
+        };
+        const profileData = (await profileResponse.json()) as {
+          profile?: Profile | null;
+        };
+
+        if (!profileData.profile) {
+          throw new Error("Profile is missing.");
+        }
+
         if (isMounted) {
-          setProjects(fallbackProjects);
-          setProfile(fallbackProfile);
+          setProjects(projectsData.projects ?? []);
+          setProfile(profileData.profile);
+          setError("");
+        }
+      } catch (error) {
+        if (isMounted) {
+          setError(
+            error instanceof Error ? error.message : "Content could not be loaded.",
+          );
         }
       }
     }
@@ -74,9 +74,25 @@ function HomePage() {
     };
   }, []);
 
+  if (error) {
+    return (
+      <main className="home-page">
+        <p className="admin-message">{error}</p>
+      </main>
+    );
+  }
+
+  if (!profile || !projects) {
+    return (
+      <main className="home-page">
+        <p className="admin-muted">Loading content...</p>
+      </main>
+    );
+  }
+
   return (
     <main className="home-page">
-      <h1 className="sr-only">Gorazd Filipovski</h1>
+      <h1 className="sr-only">{profile.displayName}</h1>
 
       <div className="site-shell">
         <div className="corner corner--top-left">

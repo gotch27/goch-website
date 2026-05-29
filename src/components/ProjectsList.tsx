@@ -1,5 +1,5 @@
 import type { Project } from "../types/project";
-import { ProjectMark } from "./ProjectMark";
+import { ProjectLogo } from "./ProjectLogo";
 
 interface ProjectsListProps {
   projects: Project[];
@@ -21,8 +21,7 @@ export function ProjectsList({ projects, onProjectSelect }: ProjectsListProps) {
                 className="project-button"
                 onClick={() => onProjectSelect(project)}
               >
-                <ProjectMark
-                  mark={project.mark}
+                <ProjectLogo
                   logo={project.image}
                   name={project.name}
                 />

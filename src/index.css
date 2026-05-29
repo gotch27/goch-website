@@ -230,7 +230,7 @@ svg {
   outline-offset: 4px;
 }
 
-.project-mark {
+.project-logo {
   display: inline-grid;
   width: var(--project-row-height);
   height: var(--project-row-height);
@@ -239,39 +239,16 @@ svg {
   flex: 0 0 auto;
 }
 
-.project-mark__shape {
-  display: block;
-  width: 12px;
-  height: 12px;
-  background: var(--foreground);
-}
-
-.project-mark__shape--diamond {
-  transform: rotate(45deg);
-}
-
-.project-mark__shape--triangle {
-  width: 0;
-  height: 0;
-  border-right: 7px solid transparent;
-  border-bottom: 13px solid var(--foreground);
-  border-left: 7px solid transparent;
-  background: transparent;
-}
-
-.project-mark__shape--circle {
-  border-radius: 50%;
-}
-
-.project-mark__shape--square {
-  width: 13px;
-  height: 13px;
-}
-
-.project-mark__logo {
+.project-logo__image {
   width: 100%;
   height: 100%;
   object-fit: contain;
+}
+
+.project-logo__initials {
+  font-size: 0.76rem;
+  font-weight: 600;
+  line-height: 1;
 }
 
 .contact-panel {
@@ -351,7 +328,7 @@ svg {
   padding-right: 42px;
 }
 
-.project-dialog__header .project-mark {
+.project-dialog__header .project-logo {
   --project-row-height: 56px;
 }
 
@@ -569,7 +546,7 @@ svg {
   opacity: 0.42;
 }
 
-.admin-project-row .project-mark {
+.admin-project-row .project-logo {
   --project-row-height: 44px;
 }
 

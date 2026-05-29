@@ -1,14 +1,11 @@
 import { neon } from "@neondatabase/serverless";
 import { requiredEnv } from "./http.js";
 
-export type ProjectMark = "diamond" | "triangle" | "circle" | "square";
-
 export interface ProjectRecord {
   id: string;
   name: string;
-  mark: ProjectMark;
   description: string;
-  image: string;
+  image?: string;
   imageKey?: string;
   github?: string;
   deployment?: string;
@@ -17,9 +14,8 @@ export interface ProjectRecord {
 
 export interface ProjectInput {
   name: string;
-  mark: ProjectMark;
   description: string;
-  image: string;
+  image?: string;
   imageKey?: string;
   github?: string;
   deployment?: string;
@@ -29,16 +25,13 @@ export interface ProjectInput {
 interface ProjectRow {
   id: string;
   name: string;
-  mark: ProjectMark;
   description: string;
-  image_url: string;
+  image_url: string | null;
   image_key: string | null;
   github_url: string | null;
   deployment_url: string | null;
   sort_order: number;
 }
-
-const marks = new Set<ProjectMark>(["diamond", "triangle", "circle", "square"]);
 
 export function getSql() {
   return neon(requiredEnv("DATABASE_URL"));
@@ -47,7 +40,7 @@ export function getSql() {
 export async function getProjects() {
   const sql = getSql();
   const rows = await sql`
-    select id, name, mark, description, image_url, image_key, github_url, deployment_url, sort_order
+    select id, name, description, image_url, image_key, github_url, deployment_url, sort_order
     from projects
     order by sort_order asc, created_at desc
   `;
@@ -58,7 +51,7 @@ export async function getProjects() {
 export async function getProjectById(id: string) {
   const sql = getSql();
   const rows = await sql`
-    select id, name, mark, description, image_url, image_key, github_url, deployment_url, sort_order
+    select id, name, description, image_url, image_key, github_url, deployment_url, sort_order
     from projects
     where id = ${id}
     limit 1
@@ -73,9 +66,8 @@ export function readProjectInput(body: unknown): ProjectInput {
   }
 
   const name = readRequiredString(body.name, "name");
-  const mark = readMark(body.mark);
   const description = readRequiredString(body.description, "description");
-  const image = readRequiredString(body.image, "image");
+  const image = readOptionalString(body.image);
   const imageKey = readOptionalString(body.imageKey);
   const github = readOptionalString(body.github);
   const deployment = readOptionalString(body.deployment);
@@ -83,7 +75,6 @@ export function readProjectInput(body: unknown): ProjectInput {
 
   return {
     name,
-    mark,
     description,
     image,
     imageKey,
@@ -97,9 +88,8 @@ function mapProjectRow(row: ProjectRow): ProjectRecord {
   return {
     id: row.id,
     name: row.name,
-    mark: row.mark,
     description: row.description,
-    image: row.image_url,
+    image: row.image_url ?? undefined,
     imageKey: row.image_key ?? undefined,
     github: row.github_url ?? undefined,
     deployment: row.deployment_url ?? undefined,
@@ -126,14 +116,6 @@ function readOptionalString(value: unknown) {
 
   const trimmed = value.trim();
   return trimmed.length > 0 ? trimmed : undefined;
-}
-
-function readMark(value: unknown): ProjectMark {
-  if (typeof value === "string" && marks.has(value as ProjectMark)) {
-    return value as ProjectMark;
-  }
-
-  throw new Error("Invalid mark");
 }
 
 function readSortOrder(value: unknown) {

@@ -1,16 +1,7 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import type { FormEvent } from "react";
-import { ProjectMark } from "../components/ProjectMark";
-import type {
-  Profile,
-  Project,
-  ProjectMark as ProjectMarkType,
-} from "../types/project";
-
-interface AdminPageProps {
-  fallbackProjects: Project[];
-  fallbackProfile: Profile;
-}
+import { ProjectLogo } from "../components/ProjectLogo";
+import type { Profile, Project } from "../types/project";
 
 interface UploadResult {
   url: string;
@@ -20,53 +11,57 @@ interface UploadResult {
 type AdminStatus = "checking" | "authenticated" | "anonymous";
 type AdminSection = "profile" | "projects" | "project-editor";
 
-const projectMarks: ProjectMarkType[] = [
-  "diamond",
-  "triangle",
-  "circle",
-  "square",
-];
+const emptyProfile: Profile = {
+  displayName: "",
+  greeting: "",
+  bio: "",
+};
 
-export function AdminPage({
-  fallbackProjects,
-  fallbackProfile,
-}: AdminPageProps) {
+export function AdminPage() {
   const [status, setStatus] = useState<AdminStatus>("checking");
   const [token, setToken] = useState("");
-  const [projects, setProjects] = useState<Project[]>(fallbackProjects);
+  const [projects, setProjects] = useState<Project[]>([]);
   const [selectedId, setSelectedId] = useState<string>("new");
   const [activeSection, setActiveSection] = useState<AdminSection>("projects");
   const [draft, setDraft] = useState<Project>(() => createEmptyProject());
-  const [profile, setProfile] = useState<Profile>(fallbackProfile);
+  const [profile, setProfile] = useState<Profile | null>(null);
   const [message, setMessage] = useState("");
   const [isSaving, setIsSaving] = useState(false);
   const selectedProject = useMemo(
     () => projects.find((project) => project.id === selectedId) ?? null,
     [projects, selectedId],
   );
+  const profileDraft = profile ?? emptyProfile;
 
   const loadAdminContent = useCallback(async () => {
+    setMessage("");
     const [projectsResponse, profileResponse] = await Promise.all([
       fetch("/api/admin/projects"),
       fetch("/api/admin/profile"),
     ]);
 
-    if (projectsResponse.ok) {
-      const data = (await projectsResponse.json()) as { projects?: Project[] };
-      setProjects(data.projects ?? []);
-    } else {
-      setProjects(fallbackProjects);
+    if (!projectsResponse.ok) {
+      throw new Error("Projects could not be loaded.");
     }
 
-    if (profileResponse.ok) {
-      const data = (await profileResponse.json()) as { profile?: Profile | null };
-      setProfile({
-        displayName: data.profile?.displayName ?? fallbackProfile.displayName,
-        greeting: data.profile?.greeting ?? fallbackProfile.greeting,
-        bio: data.profile?.bio ?? fallbackProfile.bio,
-      });
+    if (!profileResponse.ok) {
+      throw new Error("Profile could not be loaded.");
     }
-  }, [fallbackProfile, fallbackProjects]);
+
+    const projectsData = (await projectsResponse.json()) as {
+      projects?: Project[];
+    };
+    const profileData = (await profileResponse.json()) as {
+      profile?: Profile | null;
+    };
+
+    if (!profileData.profile) {
+      throw new Error("Profile is missing.");
+    }
+
+    setProjects(projectsData.projects ?? []);
+    setProfile(profileData.profile);
+  }, []);
 
   useEffect(() => {
     async function checkSession() {
@@ -77,7 +72,15 @@ export function AdminPage({
 
       if (response.ok && data?.authenticated) {
         setStatus("authenticated");
-        await loadAdminContent();
+        try {
+          await loadAdminContent();
+        } catch (error) {
+          setMessage(
+            error instanceof Error
+              ? error.message
+              : "Admin content could not be loaded.",
+          );
+        }
         return;
       }
 
@@ -113,13 +116,22 @@ export function AdminPage({
 
     setStatus("authenticated");
     setToken("");
-    await loadAdminContent();
+    try {
+      await loadAdminContent();
+    } catch (error) {
+      setMessage(
+        error instanceof Error
+          ? error.message
+          : "Admin content could not be loaded.",
+      );
+    }
   }
 
   async function logout() {
     await fetch("/api/admin/login", { method: "DELETE" });
     setStatus("anonymous");
     setProjects([]);
+    setProfile(null);
   }
 
   async function saveProject(event: FormEvent<HTMLFormElement>) {
@@ -235,6 +247,11 @@ export function AdminPage({
 
   async function saveProfile(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
+    if (!profile) {
+      setMessage("Profile is not loaded.");
+      return;
+    }
+
     setIsSaving(true);
     setMessage("");
 
@@ -376,9 +393,12 @@ export function AdminPage({
                 <label>
                   Greeting
                   <input
-                    value={profile.greeting}
+                    value={profileDraft.greeting}
                     onChange={(event) =>
-                      setProfile({ ...profile, greeting: event.target.value })
+                      setProfile({
+                        ...profileDraft,
+                        greeting: event.target.value,
+                      })
                     }
                     required
                   />
@@ -386,10 +406,10 @@ export function AdminPage({
                 <label>
                   Display name
                   <input
-                    value={profile.displayName}
+                    value={profileDraft.displayName}
                     onChange={(event) =>
                       setProfile({
-                        ...profile,
+                        ...profileDraft,
                         displayName: event.target.value,
                       })
                     }
@@ -401,9 +421,9 @@ export function AdminPage({
               <label>
                 Bio
                 <textarea
-                  value={profile.bio}
+                  value={profileDraft.bio}
                   onChange={(event) =>
-                    setProfile({ ...profile, bio: event.target.value })
+                    setProfile({ ...profileDraft, bio: event.target.value })
                   }
                   rows={5}
                   required
@@ -438,8 +458,7 @@ export function AdminPage({
               {projects.length > 0 ? (
                 projects.map((project, index) => (
                   <article className="admin-project-row" key={project.id}>
-                    <ProjectMark
-                      mark={project.mark}
+                    <ProjectLogo
                       logo={project.image}
                       name={project.name}
                     />
@@ -500,24 +519,6 @@ export function AdminPage({
                     }
                     required
                   />
-                </label>
-                <label>
-                  Mark
-                  <select
-                    value={draft.mark}
-                    onChange={(event) =>
-                      setDraft({
-                        ...draft,
-                        mark: event.target.value as ProjectMarkType,
-                      })
-                    }
-                  >
-                    {projectMarks.map((mark) => (
-                      <option key={mark} value={mark}>
-                        {mark}
-                      </option>
-                    ))}
-                  </select>
                 </label>
               </div>
 
@@ -625,9 +626,7 @@ function createEmptyProject(sortOrder = 0): Project {
   return {
     id: "",
     name: "",
-    mark: "diamond",
     description: "",
-    image: "",
     sortOrder,
   };
 }
@@ -637,7 +636,7 @@ function normalizeProject(project: Project): Project {
     ...project,
     name: project.name.trim(),
     description: project.description.trim(),
-    image: project.image.trim(),
+    image: project.image?.trim() || undefined,
     github: project.github?.trim() || undefined,
     deployment: project.deployment?.trim() || undefined,
     sortOrder: project.sortOrder ?? 0,

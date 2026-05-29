@@ -1,6 +1,6 @@
 import { useEffect } from "react";
 import type { Project } from "../types/project";
-import { ProjectMark } from "./ProjectMark";
+import { ProjectLogo } from "./ProjectLogo";
 
 interface ProjectDialogProps {
   project: Project | null;
@@ -56,8 +56,7 @@ export function ProjectDialog({ project, onClose }: ProjectDialogProps) {
         </button>
 
         <div className="project-dialog__header">
-          <ProjectMark
-            mark={project.mark}
+          <ProjectLogo
             logo={project.image}
             name={project.name}
           />

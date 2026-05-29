@@ -40,10 +40,10 @@ export default async function handler(
     const id = randomUUID();
     await sql`
       insert into projects (
-        id, name, mark, description, image_url, image_key, github_url, deployment_url, sort_order
+        id, name, description, image_url, image_key, github_url, deployment_url, sort_order
       )
       values (
-        ${id}, ${input.name}, ${input.mark}, ${input.description}, ${input.image}, ${input.imageKey ?? null},
+        ${id}, ${input.name}, ${input.description}, ${input.image ?? null}, ${input.imageKey ?? null},
         ${input.github ?? null}, ${input.deployment ?? null}, ${input.sortOrder}
       )
     `;

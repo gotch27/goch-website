@@ -3,9 +3,8 @@ exports.up = (pgm) => {
     create table if not exists projects (
       id text primary key,
       name text not null,
-      mark text not null check (mark in ('diamond', 'triangle', 'circle', 'square')),
       description text not null,
-      image_url text not null,
+      image_url text,
       image_key text,
       github_url text,
       deployment_url text,

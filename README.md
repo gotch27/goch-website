@@ -42,6 +42,4 @@ Migrations live in `database/migrations`. They are applied through
 - Project logos upload to Vercel Blob.
 - Neon stores the image URL and Blob key, not the image file itself.
 - The profile portrait is a static bundled asset at `src/assets/gorazd-profile.png`.
-
-The site still falls back to the local JSON/static assets if the API is not
-available, which keeps local Vite development simple.
+- If database content cannot be loaded, the UI shows an error message.
