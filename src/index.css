@@ -688,6 +688,14 @@ svg {
     grid-area: profile;
   }
 
+  .profile-intro {
+    justify-content: space-between;
+  }
+
+  .profile-intro__portrait {
+    order: 2;
+  }
+
   .corner--top-right {
     grid-area: bio;
   }

@@ -10,7 +10,7 @@ export function ProjectsList({ projects, onProjectSelect }: ProjectsListProps) {
   return (
     <section className="projects-panel" aria-labelledby="projects-heading">
       <h2 id="projects-heading" className="section-label">
-        Some projects of mine
+        Fav projects
       </h2>
       <div className="projects-panel__scroll">
         <ul className="projects-list">
