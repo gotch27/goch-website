@@ -9,6 +9,14 @@
       "destination": "https://gocheski-schedule.vercel.app/schedule/:path*"
     },
     {
+      "source": "/mind",
+      "destination": "https://gocheski-mind.vercel.app/mind"
+    },
+    {
+      "source": "/mind/:path*",
+      "destination": "https://gocheski-mind.vercel.app/mind/:path*"
+    },
+    {
       "source": "/admin",
       "destination": "/index.html"
     },
