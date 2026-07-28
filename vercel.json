@@ -1,6 +1,14 @@
 {
   "rewrites": [
     {
+      "source": "/schedule",
+      "destination": "https://gocheski-schedule.vercel.app/schedule"
+    },
+    {
+      "source": "/schedule/:path*",
+      "destination": "https://gocheski-schedule.vercel.app/schedule/:path*"
+    },
+    {
       "source": "/admin",
       "destination": "/index.html"
     },
